@@ -186,3 +186,31 @@ for i in indices[0]:
 
     print("\nDESCRIPCION:")
     print(df_limpio.iloc[i]["Ticket Description"])
+
+"""Agente 3: Comunicador
+Recupera información relevante.
+Genera un reporte en lenguaje natural.
+"""
+
+class AgenteComunicador:
+
+    def generar_reporte(self, df):
+
+        print("===== REPORTE GENERAL =====")
+
+        print("\nCantidad total de tickets:")
+        print(len(df))
+
+        print("\nTipos de ticket:")
+        print(df["Ticket Type"].value_counts())
+
+        print("\nPrioridades:")
+        print(df["Ticket Priority"].value_counts())
+
+        print("\nEstados:")
+        print(df["Ticket Status"].value_counts())
+
+
+comunicador = AgenteComunicador()
+
+comunicador.generar_reporte(df_limpio)
