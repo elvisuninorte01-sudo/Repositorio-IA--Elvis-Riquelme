@@ -40,3 +40,65 @@ nombre_archivo = list(uploaded.keys())[0]
 df = pd.read_csv(nombre_archivo)
 
 print(df.shape)
+
+"""Agente 1: Normalizador
+
+Carga el dataset.
+Detecta valores nulos.
+Detecta duplicados.
+Limpia texto.
+Genera un dataset limpio.
+"""
+
+import pandas as pd
+
+class AgenteNormalizador:
+
+    def __init__(self, archivo):
+        self.archivo = archivo
+
+    def ejecutar(self):
+
+        df = pd.read_csv(self.archivo)
+
+        print("===== ANALISIS INICIAL =====")
+        print("Filas y columnas:", df.shape)
+
+        print("\nValores nulos:")
+        print(df.isnull().sum())
+
+        print("\nDuplicados:")
+        print(df.duplicated().sum())
+
+        # Eliminar duplicados
+        df = df.drop_duplicates()
+
+        # Completar valores faltantes
+        for columna in df.columns:
+
+            if df[columna].dtype == "object":
+                df[columna] = df[columna].fillna("No especificado")
+            else:
+                df[columna] = df[columna].fillna(df[columna].median())
+
+        # Normalizar texto
+        for columna in df.select_dtypes(include="object").columns:
+
+            df[columna] = (
+                df[columna]
+                .astype(str)
+                .str.lower()
+                .str.strip()
+            )
+
+        print("\n===== DATASET NORMALIZADO =====")
+        print(df.shape)
+
+        return df
+
+
+agente_normalizador = AgenteNormalizador(nombre_archivo)
+
+df_limpio = agente_normalizador.ejecutar()
+
+df_limpio.head()
