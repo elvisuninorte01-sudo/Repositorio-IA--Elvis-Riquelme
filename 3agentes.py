@@ -102,3 +102,87 @@ agente_normalizador = AgenteNormalizador(nombre_archivo)
 df_limpio = agente_normalizador.ejecutar()
 
 df_limpio.head()
+
+"""Agente 2: Entrenador
+
+Recibe el dataset limpio.
+Genera embeddings con un Transformer.
+Construye la base vectorial FAISS.
+
+Crear texto para los embeddings
+"""
+
+df_limpio["texto_completo"] = (
+    df_limpio["Ticket Subject"] + " " +
+    df_limpio["Ticket Description"]
+)
+
+df_limpio["texto_completo"].head()
+
+"""Instalar librerías del Agente Entrenador"""
+
+!pip install sentence-transformers faiss-cpu -q
+
+"""Importar librerías"""
+
+from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
+
+"""Cargar Transformer"""
+
+modelo = SentenceTransformer(
+    "all-MiniLM-L6-v2"
+)
+
+print("Transformer cargado correctamente")
+
+"""Generar embeddings"""
+
+embeddings = modelo.encode(
+    df_limpio["texto_completo"].tolist(),
+    show_progress_bar=True
+)
+
+print(embeddings.shape)
+
+"""Crear Base Vectorial"""
+
+dimension = embeddings.shape[1]
+
+index = faiss.IndexFlatL2(dimension)
+
+index.add(
+    np.array(embeddings).astype("float32")
+)
+
+print("Vectores almacenados:")
+print(index.ntotal)
+
+"""Implementar búsqueda RAG"""
+
+consulta = "cannot login to my account"
+
+vector_consulta = modelo.encode([consulta])
+
+distancias, indices = index.search(
+    np.array(vector_consulta).astype("float32"),
+    5
+)
+
+print(indices)
+
+"""Mostrar resultados recuperados"""
+
+for i in indices[0]:
+
+    print("="*60)
+
+    print("TIPO:")
+    print(df_limpio.iloc[i]["Ticket Type"])
+
+    print("\nASUNTO:")
+    print(df_limpio.iloc[i]["Ticket Subject"])
+
+    print("\nDESCRIPCION:")
+    print(df_limpio.iloc[i]["Ticket Description"])
